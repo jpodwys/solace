@@ -3,6 +3,8 @@
 import { Advocate } from "@/types/types";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
+import AdvocateCard from "./components/AdvocateCard";
+import SearchInput from "./components/SearchInput";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
@@ -40,62 +42,22 @@ export default function Home() {
     triggerFetchData(e.target.value);
   }, [setQuery, triggerFetchData]);
 
-  const onClick = () => {
+  const reset = () => {
     setQuery('');
     triggerFetchData('');
   };
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
+    <main className="p-6">
+      <h1 className="text-4xl mb-6">Solace Advocates</h1>
       <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span>{query}</span>
-        </p>
-        <input
-          style={{ border: "1px solid black" }}
-          onChange={onChange}
-          value={query}
-        />
-        <button onClick={onClick}>Reset Search</button>
+        <SearchInput query={query} reset={reset} onChange={onChange} />
       </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {advocates.map((advocate, advocateIndex) => {
-            return (
-              <tr key={advocateIndex}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s, specialtyIndex) => (
-                    <div key={specialtyIndex}>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="flex flex-wrap justify-center mt-6">
+        {advocates.map((advocate, index) => {
+          return <AdvocateCard advocate={advocate} key={index} />;
+        })}
+      </div>
     </main>
   );
 }
