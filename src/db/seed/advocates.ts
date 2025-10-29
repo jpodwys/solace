@@ -36,7 +36,7 @@ const randomSpecialty = () => {
   return [random1, random2];
 };
 
-const advocateData: Advocate[] = [
+const advocateData: Omit<Advocate, 'id'>[] = [
   {
     firstName: "John",
     lastName: "Doe",
