@@ -5,7 +5,9 @@ export enum Degrees {
 };
 
 export type Advocate = {
-  id: string;
+  // Excluding id for now so we can re-use this type for the
+  // default API payload since it doubles as the seed data.
+  // id: number;
   firstName: string;
   lastName: string;
   city: string;
