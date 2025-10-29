@@ -2,43 +2,37 @@
 
 import { Advocate } from "@/types/types";
 import React, { useEffect, useState } from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
+    const abortMessage = 'replaced';
+    const controller = new AbortController();
+    const { signal } = controller;
+    fetch(`/api/advocates?q=${query}`, { signal }).then((response) => {
       response.json().then((jsonResponse) => {
         setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
       });
-    });
-  }, [setAdvocates, setFilteredAdvocates]);
-
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.toString().includes(searchTerm)
-      );
+    }).catch(error => {
+      if (error !== abortMessage) {
+        throw error;
+      }
     });
 
-    setFilteredAdvocates(filteredAdvocates);
-  };
+    return () => {
+      controller.abort(abortMessage);
+    }
+  }, [query, setAdvocates]);
+
+  const onChange = useDebounceCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  }, 200);
 
   const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
+    setQuery('');
   };
 
   return (
@@ -49,7 +43,7 @@ export default function Home() {
       <div>
         <p>Search</p>
         <p>
-          Searching for: <span>{searchTerm}</span>
+          Searching for: <span>{query}</span>
         </p>
         <input style={{ border: "1px solid black" }} onChange={onChange} />
         <button onClick={onClick}>Reset Search</button>
@@ -69,7 +63,7 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {filteredAdvocates.map((advocate, advocateIndex) => {
+          {advocates.map((advocate, advocateIndex) => {
             return (
               <tr key={advocateIndex}>
                 <td>{advocate.firstName}</td>
